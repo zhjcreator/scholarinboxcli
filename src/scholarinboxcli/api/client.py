@@ -13,6 +13,7 @@ from typing import Any
 import httpx
 
 from scholarinboxcli.config import Config, load_config, save_config
+from scholarinboxcli.api import endpoints as ep
 
 
 @dataclass
@@ -106,7 +107,7 @@ class ScholarInboxClient:
             sha_key = None
 
         if sha_key:
-            resp = self.client.get(f"/api/login/{sha_key}/")
+            resp = self.client.get(ep.LOGIN_WITH_SHA_TEMPLATE.format(sha_key=sha_key))
             if resp.status_code >= 400:
                 raise ApiError("Login failed", resp.status_code, resp.text)
             self.save_cookies()
@@ -155,18 +156,18 @@ class ScholarInboxClient:
         raise ApiError("No endpoints tried")
 
     def session_info(self) -> Any:
-        return self._request("GET", "/api/session_info")
+        return self._request("GET", ep.SESSION_INFO)
 
     def get_digest(self, date: str | None = None) -> Any:
         if date:
-            return self._request("GET", f"/api/?date={date}")
-        return self._request("GET", "/api/")
+            return self._request("GET", f"{ep.DIGEST}?date={date}")
+        return self._request("GET", ep.DIGEST)
 
     def get_trending(self, category: str = "ALL", days: int = 7, sort: str = "hype", asc: bool = False) -> Any:
         asc_val = "1" if asc else "0"
         return self._request(
             "GET",
-            f"/api/trending?column={sort}&category={category}&ascending={asc_val}&dates={days}",
+            f"{ep.TRENDING}?column={sort}&category={category}&ascending={asc_val}&dates={days}",
         )
 
     def search(self, query: str, sort: str | None = None, limit: int | None = None, offset: int | None = None) -> Any:
@@ -178,7 +179,7 @@ class ScholarInboxClient:
         }
         if sort:
             payload["orderBy"] = sort
-        return self._request("POST", "/api/get_search_results/", json=payload)
+        return self._request("POST", ep.SEARCH, json=payload)
 
     def semantic_search(self, text: str, limit: int | None = None, offset: int | None = None) -> Any:
         payload: dict[str, Any] = {
@@ -188,52 +189,47 @@ class ScholarInboxClient:
         }
         if limit is not None:
             payload["n_results"] = limit
-        return self._request("POST", "/api/semantic-search", json=payload)
+        return self._request("POST", ep.SEMANTIC_SEARCH, json=payload)
 
     def interactions(self, type_: str = "all", sort: str = "ranking_score", asc: bool = False) -> Any:
         asc_val = "1" if asc else "0"
         return self._request(
             "GET",
-            f"/api/interactions?column={sort}&type={type_}&ascending={asc_val}",
+            f"{ep.INTERACTIONS}?column={sort}&type={type_}&ascending={asc_val}",
         )
 
     def bookmarks(self) -> Any:
-        return self._request("GET", "/api/bookmarks")
+        return self._request("GET", ep.BOOKMARKS)
 
     def bookmark_add(self, paper_id: str) -> Any:
         payload = {"bookmarked": True, "id": paper_id}
         try:
-            return self._request("POST", "/api/bookmark_paper/", json=payload)
+            return self._request("POST", ep.BOOKMARK_PAPER, json=payload)
         except ApiError:
-            return self._request("POST", "/api/bookmark_paper/", data=payload)
+            return self._request("POST", ep.BOOKMARK_PAPER, data=payload)
 
     def bookmark_remove(self, paper_id: str) -> Any:
         payload = {"bookmarked": False, "id": paper_id}
         try:
-            return self._request("POST", "/api/bookmark_paper/", json=payload)
+            return self._request("POST", ep.BOOKMARK_PAPER, json=payload)
         except ApiError:
-            return self._request("POST", "/api/bookmark_paper/", data=payload)
+            return self._request("POST", ep.BOOKMARK_PAPER, data=payload)
 
     def collections_list(self) -> Any:
         try:
-            return self._request("GET", "/api/get_all_user_collections")
+            return self._request("GET", ep.COLLECTIONS_PRIMARY)
         except ApiError:
-            return self._request("GET", "/api/collections")
+            return self._request("GET", ep.COLLECTIONS_FALLBACK)
 
     def collections_expanded(self) -> Any:
-        return self._request("GET", "/api/get_expanded_collections")
+        return self._request("GET", ep.COLLECTIONS_EXPANDED)
 
     def collections_map(self) -> Any:
-        return self._request("GET", "/api/collections")
+        return self._request("GET", ep.COLLECTIONS_FALLBACK)
 
     def collection_create(self, name: str) -> Any:
         payload = {"name": name, "collection_name": name}
-        endpoints = [
-            "/api/create_collection/",
-            "/api/collections",
-            "/api/collection-create/",
-        ]
-        return self._post_first(endpoints, payload)
+        return self._post_first(list(ep.COLLECTION_CREATE_CANDIDATES), payload)
 
     def collection_rename(self, collection_id: str, new_name: str) -> Any:
         payload = {
@@ -242,39 +238,19 @@ class ScholarInboxClient:
             "name": new_name,
             "new_name": new_name,
         }
-        endpoints = [
-            "/api/rename_collection/",
-            "/api/collection-rename/",
-            "/api/collections/rename",
-        ]
-        return self._post_first(endpoints, payload)
+        return self._post_first(list(ep.COLLECTION_RENAME_CANDIDATES), payload)
 
     def collection_delete(self, collection_id: str) -> Any:
         payload = {"collection_id": collection_id, "id": collection_id}
-        endpoints = [
-            "/api/delete_collection/",
-            "/api/collection-delete/",
-            "/api/collections/delete",
-        ]
-        return self._post_first(endpoints, payload)
+        return self._post_first(list(ep.COLLECTION_DELETE_CANDIDATES), payload)
 
     def collection_add_paper(self, collection_id: str, paper_id: str) -> Any:
         payload = {"collection_id": collection_id, "paper_id": paper_id}
-        endpoints = [
-            "/api/add_paper_to_collection/",
-            "/api/collection-add-paper/",
-            "/api/add_to_collection/",
-        ]
-        return self._post_first(endpoints, payload)
+        return self._post_first(list(ep.COLLECTION_ADD_PAPER_CANDIDATES), payload)
 
     def collection_remove_paper(self, collection_id: str, paper_id: str) -> Any:
         payload = {"collection_id": collection_id, "paper_id": paper_id}
-        endpoints = [
-            "/api/remove_paper_from_collection/",
-            "/api/collection-remove-paper/",
-            "/api/remove_from_collection/",
-        ]
-        return self._post_first(endpoints, payload)
+        return self._post_first(list(ep.COLLECTION_REMOVE_PAPER_CANDIDATES), payload)
 
     def collection_papers(self, collection_id: str, limit: int | None = None, offset: int | None = None) -> Any:
         params: dict[str, Any] = {"collection_id": collection_id}
@@ -283,10 +259,10 @@ class ScholarInboxClient:
         if offset is not None:
             params["offset"] = offset
         try:
-            return self._request("GET", "/api/collection-papers", params=params)
+            return self._request("GET", ep.COLLECTION_PAPERS, params=params)
         except ApiError:
             # fallback without paging
-            return self._request("GET", "/api/collection-papers", params={"collection_id": collection_id})
+            return self._request("GET", ep.COLLECTION_PAPERS, params={"collection_id": collection_id})
 
     def collections_similar(self, collection_ids: list[str], limit: int | None = None, offset: int | None = None) -> Any:
         schemas = [
@@ -317,39 +293,39 @@ class ScholarInboxClient:
             payload: dict[str, Any] = {"collectionIds": collection_ids, "p": offset if offset is not None else 0}
             if limit is not None:
                 payload["n_results"] = limit
-            return self._request("POST", "/api/get_collections_similar_papers/", json=payload)
+            return self._request("POST", ep.COLLECTIONS_SIMILAR, json=payload)
         if schema == "json_collection_ids":
             payload: dict[str, Any] = {"collection_ids": collection_ids}
             if limit is not None:
                 payload["limit"] = limit
             if offset is not None:
                 payload["offset"] = offset
-            return self._request("POST", "/api/get_collections_similar_papers/", json=payload)
+            return self._request("POST", ep.COLLECTIONS_SIMILAR, json=payload)
         if schema == "json_collection_id" and len(collection_ids) == 1:
             payload = {"collection_id": collection_ids[0]}
             if limit is not None:
                 payload["limit"] = limit
             if offset is not None:
                 payload["offset"] = offset
-            return self._request("POST", "/api/get_collections_similar_papers/", json=payload)
+            return self._request("POST", ep.COLLECTIONS_SIMILAR, json=payload)
         if schema == "form_collection_ids":
             payload = {"collection_ids": ",".join(collection_ids)}
             if limit is not None:
                 payload["limit"] = limit
             if offset is not None:
                 payload["offset"] = offset
-            return self._request("POST", "/api/get_collections_similar_papers/", data=payload)
+            return self._request("POST", ep.COLLECTIONS_SIMILAR, data=payload)
         if schema == "get_params":
             params = {"collection_id": ",".join(collection_ids)}
             if limit is not None:
                 params["limit"] = limit
             if offset is not None:
                 params["offset"] = offset
-            return self._request("GET", "/api/get_collections_similar_papers/", params=params)
+            return self._request("GET", ep.COLLECTIONS_SIMILAR, params=params)
         raise ApiError("Unknown schema")
 
     def conference_list(self) -> Any:
-        return self._request("GET", "/api/conference_list")
+        return self._request("GET", ep.CONFERENCE_LIST)
 
     def conference_explorer(self) -> Any:
-        return self._request("GET", "/api/conference-explorer")
+        return self._request("GET", ep.CONFERENCE_EXPLORER)

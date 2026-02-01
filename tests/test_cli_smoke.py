@@ -3,6 +3,7 @@ from __future__ import annotations
 from typer.testing import CliRunner
 
 import scholarinboxcli.cli as cli
+import scholarinboxcli.commands.common as common
 
 
 class _FakeClient:
@@ -21,7 +22,7 @@ class _FakeClient:
 
 def test_auth_status_json_is_pretty(monkeypatch):
     runner = CliRunner()
-    monkeypatch.setattr(cli, "ScholarInboxClient", _FakeClient)
+    monkeypatch.setattr(common, "ScholarInboxClient", _FakeClient)
 
     result = runner.invoke(cli.app, ["auth", "status", "--json"])
 
@@ -31,7 +32,7 @@ def test_auth_status_json_is_pretty(monkeypatch):
 
 def test_conference_explore_json(monkeypatch):
     runner = CliRunner()
-    monkeypatch.setattr(cli, "ScholarInboxClient", _FakeClient)
+    monkeypatch.setattr(common, "ScholarInboxClient", _FakeClient)
 
     result = runner.invoke(cli.app, ["conference", "explore", "--json"])
 
