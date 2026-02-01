@@ -15,3 +15,34 @@ def test_format_table_renders_scalar_list():
     assert "(no results)" not in output
     assert "AIAgents" in output
     assert "Benchmark" in output
+
+
+def test_format_table_extracts_year_from_publication_date():
+    data = {
+        "digest_df": [
+            {
+                "title": "Paper",
+                "authors": "A, B",
+                "publication_date": "2025-12-01",
+                "paper_id": 1,
+            }
+        ]
+    }
+    output = format_table(data, title="Papers")
+    assert "2025" in output
+
+
+def test_format_table_truncates_long_authors():
+    long_authors = ", ".join([f"Author{i}" for i in range(1, 30)])
+    data = {
+        "digest_df": [
+            {
+                "title": "Paper",
+                "authors": long_authors,
+                "year": 2025,
+                "paper_id": 1,
+            }
+        ]
+    }
+    output = format_table(data, title="Papers")
+    assert "..." in output

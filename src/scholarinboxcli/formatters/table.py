@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 import json
+from datetime import datetime, timezone
 
 from rich.console import Console
 from rich.table import Table
@@ -18,9 +19,39 @@ def _get_authors(paper: dict[str, Any]) -> str:
                 names.append(a)
             elif isinstance(a, dict):
                 names.append(a.get("name") or a.get("author") or "")
-        return ", ".join([n for n in names if n])
+        return _truncate_text(", ".join([n for n in names if n]), 72)
     if isinstance(authors, str):
-        return authors
+        result = authors
+    else:
+        result = ""
+    return _truncate_text(result, 72)
+
+
+def _truncate_text(text: str, max_len: int) -> str:
+    if len(text) <= max_len:
+        return text
+    if max_len <= 3:
+        return text[:max_len]
+    return text[: max_len - 3] + "..."
+
+
+def _get_year(paper: dict[str, Any]) -> str:
+    year = paper.get("year") or paper.get("publication_year") or paper.get("conference_year")
+    if year is not None:
+        return str(year)
+
+    publication_date = paper.get("publication_date")
+    if isinstance(publication_date, str) and len(publication_date) >= 4 and publication_date[:4].isdigit():
+        return publication_date[:4]
+    if isinstance(publication_date, (int, float)):
+        try:
+            # Handle epoch milliseconds seen in some API payloads.
+            ts = float(publication_date)
+            if ts > 10_000_000_000:
+                ts /= 1000.0
+            return str(datetime.fromtimestamp(ts, tz=timezone.utc).year)
+        except Exception:
+            return ""
     return ""
 
 
@@ -78,7 +109,7 @@ def format_table(data: Any, title: str | None = None) -> str:
         for p in papers:
             title_val = str(p.get("title") or p.get("paper_title") or "")
             authors_val = _get_authors(p)
-            year_val = str(p.get("year") or p.get("publication_year") or "")
+            year_val = _get_year(p)
             venue_val = str(p.get("venue") or p.get("conference") or p.get("journal") or "")
             pid = str(
                 p.get("paper_id")
