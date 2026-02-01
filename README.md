@@ -106,8 +106,8 @@ scholarinboxcli conference explore --query "vision"
 ## Output modes
 
 - TTY: Rich tables
-- Piped: compact JSON
 - `--json`: pretty JSON
+- Piped: pretty JSON (auto)
 
 Examples for agents/scripting:
 
@@ -118,8 +118,31 @@ scholarinboxcli collection list | jq '.'
 # Explicit JSON
 scholarinboxcli collection papers "AIAgents" --json
 
-# Plain JSON for automation
+# JSON for automation
 scholarinboxcli search "diffusion" --json
+```
+
+## Tested (2026-02-01)
+
+The following commands were exercised against the live API (with a valid magic-link login) to confirm behavior:
+
+```bash
+scholarinboxcli --help
+scholarinboxcli auth status --json
+scholarinboxcli digest --date 01-30-2026 --json
+scholarinboxcli trending --category ALL --days 7 --json
+scholarinboxcli search "transformers" --limit 5 --json
+scholarinboxcli semantic "graph neural networks" --limit 5 --json
+scholarinboxcli interactions --type all --json
+scholarinboxcli bookmark list --json
+scholarinboxcli bookmark add 3302478 --json
+scholarinboxcli bookmark remove 3302478 --json
+scholarinboxcli collection list --json
+scholarinboxcli collection list --expanded --json
+scholarinboxcli collection papers "AIAgents" --json
+scholarinboxcli collection similar "AIAgents" --json
+scholarinboxcli conference list --json
+scholarinboxcli conference explore --query "vision" --json
 ```
 
 ## Notes
