@@ -38,6 +38,8 @@ def _truncate_text(text: str, max_len: int) -> str:
 def _get_year(paper: dict[str, Any]) -> str:
     year = paper.get("year") or paper.get("publication_year") or paper.get("conference_year")
     if year is not None:
+        if isinstance(year, float) and year.is_integer():
+            return str(int(year))
         return str(year)
 
     publication_date = paper.get("publication_date")
@@ -99,9 +101,9 @@ def _format_list_table(data: list[Any], title: str | None = None) -> str:
 def format_table(data: Any, title: str | None = None) -> str:
     papers = _extract_papers(data)
     if papers:
-        table = Table(title=title)
-        table.add_column("Title", overflow="fold")
-        table.add_column("Authors", overflow="fold")
+        table = Table(title=title, show_lines=True, row_styles=["", "dim"])
+        table.add_column("Title", overflow="fold", max_width=68)
+        table.add_column("Authors", overflow="fold", max_width=56)
         table.add_column("Year", justify="right")
         table.add_column("Venue", overflow="fold")
         table.add_column("ID", overflow="fold")

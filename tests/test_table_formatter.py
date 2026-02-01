@@ -32,6 +32,22 @@ def test_format_table_extracts_year_from_publication_date():
     assert "2025" in output
 
 
+def test_format_table_strips_decimal_from_float_year():
+    data = {
+        "digest_df": [
+            {
+                "title": "Paper",
+                "authors": "A, B",
+                "conference_year": 2024.0,
+                "paper_id": 1,
+            }
+        ]
+    }
+    output = format_table(data, title="Papers")
+    assert "2024.0" not in output
+    assert "2024" in output
+
+
 def test_format_table_truncates_long_authors():
     long_authors = ", ".join([f"Author{i}" for i in range(1, 30)])
     data = {
