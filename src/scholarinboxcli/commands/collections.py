@@ -7,6 +7,7 @@ from typing import Optional
 import typer
 
 from scholarinboxcli.commands.common import print_output, with_client
+from scholarinboxcli.formatters.domain_tables import format_collection_list
 from scholarinboxcli.services.collections import resolve_collection_id
 
 
@@ -21,7 +22,7 @@ def collection_list(
 ):
     def action(client):
         data = client.collections_expanded() if expanded else client.collections_list()
-        print_output(data, json_output, title="Collections")
+        print_output(data, json_output, title="Collections", table_formatter=format_collection_list)
 
     with_client(no_retry, action)
 

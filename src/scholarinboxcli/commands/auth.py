@@ -5,6 +5,7 @@ from __future__ import annotations
 import typer
 
 from scholarinboxcli.commands.common import print_output, with_client
+from scholarinboxcli.formatters.domain_tables import format_auth_status
 
 
 app = typer.Typer(help="Authentication commands", no_args_is_help=True)
@@ -25,7 +26,7 @@ def auth_login(
 def auth_status(json_output: bool = typer.Option(False, "--json", help="Output as JSON")):
     def action(client):
         data = client.session_info()
-        print_output(data, json_output, title="Session")
+        print_output(data, json_output, title="Session", table_formatter=format_auth_status)
 
     with_client(False, action)
 

@@ -12,12 +12,18 @@ from scholarinboxcli.formatters.json_fmt import format_json
 from scholarinboxcli.formatters.table import format_table
 
 
-def print_output(data: Any, use_json: bool, title: str | None = None) -> None:
+def print_output(
+    data: Any,
+    use_json: bool,
+    title: str | None = None,
+    table_formatter: Callable[[Any, str | None], str] | None = None,
+) -> None:
     if use_json or not sys.stdout.isatty():
         typer.echo(format_json(data))
         return
 
-    table = format_table(data, title=title)
+    formatter = table_formatter or format_table
+    table = formatter(data, title)
     if table == "(no results)":
         typer.echo(table)
         return
