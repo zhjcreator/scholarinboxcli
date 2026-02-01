@@ -167,3 +167,7 @@ scholarinboxcli search "diffusion" --json
 
 - Some collection mutations (create/rename/delete/add/remove) rely on best-effort endpoints that may change on the service side. If a mutation fails, try again or use the web UI to validate the current behavior.
 - Similar papers for collections uses the server endpoint used by the web UI. Results typically appear under `digest_df` in JSON responses.
+
+## License
+
+MIT. See `LICENSE`.
