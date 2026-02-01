@@ -30,11 +30,32 @@ scholarinboxcli auth logout
 
 Note: `auth login` extracts `sha_key` from the URL and authenticates via the API.
 
+Config is stored at `~/.config/scholarinboxcli/config.json`. You can override the API base with `SCHOLAR_INBOX_API_BASE`.
+
+## Command reference
+
+Top-level commands:
+
+- `auth` (login/status/logout)
+- `digest`
+- `trending`
+- `search`
+- `semantic`
+- `interactions`
+- `bookmark` (list/add/remove)
+- `collection` (list/create/rename/delete/add/remove/papers/similar)
+- `conference` (list/explore)
+
+Run `scholarinboxcli --help` or `scholarinboxcli <command> --help` for full options.
+
 ## Collections
 
 ```bash
 # List collections
 scholarinboxcli collection list
+
+# Expanded collection names (marks which collections are expanded server-side)
+scholarinboxcli collection list --expanded
 
 # Create, rename, delete
 scholarinboxcli collection create "My Collection"
@@ -50,7 +71,14 @@ scholarinboxcli collection papers 10759
 
 # Similar papers for one or more collections
 scholarinboxcli collection similar 10759 12345
+
+# You can also use collection names (case-insensitive). The CLI will
+# automatically fetch collection ID mappings from the API when needed.
+scholarinboxcli collection papers "AIAgents"
+scholarinboxcli collection similar "AIAgents" "Benchmark"
 ```
+
+Collection name matching is exact → prefix → contains. If multiple matches exist, the CLI reports ambiguity and shows candidate IDs.
 
 ## Search
 
@@ -71,6 +99,8 @@ scholarinboxcli digest --date 01-30-2026
 scholarinboxcli trending --category ALL --days 7
 scholarinboxcli interactions --type all
 scholarinboxcli bookmark list
+scholarinboxcli conference list
+scholarinboxcli conference explore --query "vision"
 ```
 
 ## Output modes
@@ -78,3 +108,21 @@ scholarinboxcli bookmark list
 - TTY: Rich tables
 - Piped: compact JSON
 - `--json`: pretty JSON
+
+Examples for agents/scripting:
+
+```bash
+# Auto-JSON when piped
+scholarinboxcli collection list | jq '.'
+
+# Explicit JSON
+scholarinboxcli collection papers "AIAgents" --json
+
+# Plain JSON for automation
+scholarinboxcli search "diffusion" --json
+```
+
+## Notes
+
+- Some collection mutations (create/rename/delete/add/remove) rely on best-effort endpoints that may change on the service side. If a mutation fails, try again or use the web UI to validate the current behavior.
+- Similar papers for collections uses the server endpoint used by the web UI. Results typically appear under `digest_df` in JSON responses.

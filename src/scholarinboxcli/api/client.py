@@ -223,6 +223,9 @@ class ScholarInboxClient:
     def collections_expanded(self) -> Any:
         return self._request("GET", "/api/get_expanded_collections")
 
+    def collections_map(self) -> Any:
+        return self._request("GET", "/api/collections")
+
     def collection_create(self, name: str) -> Any:
         payload = {"name": name, "collection_name": name}
         endpoints = [

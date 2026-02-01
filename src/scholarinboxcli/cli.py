@@ -46,6 +46,127 @@ def _handle_error(err: ApiError) -> None:
     raise typer.Exit(1)
 
 
+def _normalize_name(name: str) -> str:
+    return name.strip().lower()
+
+
+def _resolve_collection_id(client: ScholarInboxClient, identifier: str) -> str:
+    if identifier.isdigit():
+        return identifier
+    data = client.collections_list()
+    items = _collection_items_from_response(data)
+    candidates = _collection_candidates(items)
+    if not _candidates_have_ids(candidates):
+        try:
+            data = client.collections_expanded()
+            items = _collection_items_from_response(data)
+            candidates = _collection_candidates(items)
+        except ApiError:
+            pass
+    if not _candidates_have_ids(candidates):
+        try:
+            data = client.collections_map()
+            mapped = _collection_candidates_from_map(data)
+            if mapped:
+                candidates = mapped
+        except ApiError:
+            pass
+    if not _candidates_have_ids(candidates):
+        matched = _match_collection_name(candidates, identifier)
+        if matched:
+            # Only names are available; fall back to name as identifier.
+            return matched
+        raise ApiError("Unable to resolve collection name (no IDs available)")
+    candidates = [(name, cid) for name, cid in candidates if cid]
+    target = _normalize_name(identifier)
+    for name, cid in candidates:
+        if _normalize_name(name) == target:
+            return cid
+    # prefix match
+    prefix = [c for c in candidates if _normalize_name(c[0]).startswith(target)]
+    if len(prefix) == 1:
+        return prefix[0][1]
+    if len(prefix) > 1:
+        names = ", ".join([f"{n}({cid})" for n, cid in prefix[:10]])
+        raise ApiError(f"Ambiguous collection name. Matches: {names}")
+    # contains match
+    contains = [c for c in candidates if target in _normalize_name(c[0])]
+    if len(contains) == 1:
+        return contains[0][1]
+    if len(contains) > 1:
+        names = ", ".join([f"{n}({cid})" for n, cid in contains[:10]])
+        raise ApiError(f"Ambiguous collection name. Matches: {names}")
+    raise ApiError("Collection name not found")
+
+
+def _collection_candidates(items: object) -> list[tuple[str, str]]:
+    if not isinstance(items, list):
+        return []
+    candidates: list[tuple[str, str]] = []
+    for item in items:
+        if isinstance(item, dict):
+            name = item.get("name") or item.get("collection_name") or ""
+            cid = str(item.get("id") or item.get("collection_id") or "")
+        elif isinstance(item, str):
+            name = item
+            cid = ""
+        else:
+            continue
+        if name:
+            candidates.append((name, cid))
+    return candidates
+
+
+def _collection_items_from_response(data: object) -> object:
+    if isinstance(data, dict):
+        for key in ("collections", "expanded_collections", "collection_names"):
+            if key in data:
+                return data.get(key)
+        return data
+    return data
+
+
+def _collection_candidates_from_map(data: object) -> list[tuple[str, str]]:
+    if not isinstance(data, dict):
+        return []
+    mapping = data.get("collection_names_to_ids_dict")
+    if not isinstance(mapping, dict):
+        return []
+    candidates: list[tuple[str, str]] = []
+    for name, cid in mapping.items():
+        if name and cid is not None:
+            candidates.append((str(name), str(cid)))
+    return candidates
+
+
+def _candidates_have_ids(candidates: list[tuple[str, str]]) -> bool:
+    for _, cid in candidates:
+        if cid:
+            return True
+    return False
+
+
+def _match_collection_name(candidates: list[tuple[str, str]], identifier: str) -> str | None:
+    target = _normalize_name(identifier)
+    names = [(name, cid) for name, cid in candidates if name]
+    for name, _ in names:
+        if _normalize_name(name) == target:
+            return name
+    prefix = [c for c in names if _normalize_name(c[0]).startswith(target)]
+    if len(prefix) == 1:
+        return prefix[0][0]
+    if len(prefix) > 1:
+        names_str = ", ".join([n for n, _ in prefix[:10]])
+        raise ApiError(f"Ambiguous collection name. Matches: {names_str}")
+    contains = [c for c in names if target in _normalize_name(c[0])]
+    if len(contains) == 1:
+        return contains[0][0]
+    if len(contains) > 1:
+        names_str = ", ".join([n for n, _ in contains[:10]])
+        raise ApiError(f"Ambiguous collection name. Matches: {names_str}")
+    return None
+
+
 @auth_app.command("login")
 def auth_login(
     url: str = typer.Option(..., "--url", help="Magic login URL with sha_key"),
@@ -256,14 +377,15 @@ def collection_create(
 
 @collection_app.command("rename")
 def collection_rename(
-    collection_id: str = typer.Argument(..., help="Collection ID"),
+    collection_id: str = typer.Argument(..., help="Collection ID or name"),
     new_name: str = typer.Argument(..., help="New collection name"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
 ):
     client = ScholarInboxClient(no_retry=no_retry)
     try:
-        data = client.collection_rename(collection_id, new_name)
+        cid = _resolve_collection_id(client, collection_id)
+        data = client.collection_rename(cid, new_name)
         _print_output(data, json_output, title="Collection renamed")
     except ApiError as e:
         _handle_error(e)
@@ -273,13 +395,14 @@ def collection_rename(
 
 @collection_app.command("delete")
 def collection_delete(
-    collection_id: str = typer.Argument(..., help="Collection ID"),
+    collection_id: str = typer.Argument(..., help="Collection ID or name"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
 ):
     client = ScholarInboxClient(no_retry=no_retry)
     try:
-        data = client.collection_delete(collection_id)
+        cid = _resolve_collection_id(client, collection_id)
+        data = client.collection_delete(cid)
         _print_output(data, json_output, title="Collection deleted")
     except ApiError as e:
         _handle_error(e)
@@ -289,14 +412,15 @@ def collection_delete(
 
 @collection_app.command("add")
 def collection_add(
-    collection_id: str = typer.Argument(..., help="Collection ID"),
+    collection_id: str = typer.Argument(..., help="Collection ID or name"),
     paper_id: str = typer.Argument(..., help="Paper ID"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
 ):
     client = ScholarInboxClient(no_retry=no_retry)
     try:
-        data = client.collection_add_paper(collection_id, paper_id)
+        cid = _resolve_collection_id(client, collection_id)
+        data = client.collection_add_paper(cid, paper_id)
         _print_output(data, json_output, title="Collection add paper")
     except ApiError as e:
         _handle_error(e)
@@ -306,14 +430,15 @@ def collection_add(
 
 @collection_app.command("remove")
 def collection_remove(
-    collection_id: str = typer.Argument(..., help="Collection ID"),
+    collection_id: str = typer.Argument(..., help="Collection ID or name"),
     paper_id: str = typer.Argument(..., help="Paper ID"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
 ):
     client = ScholarInboxClient(no_retry=no_retry)
     try:
-        data = client.collection_remove_paper(collection_id, paper_id)
+        cid = _resolve_collection_id(client, collection_id)
+        data = client.collection_remove_paper(cid, paper_id)
         _print_output(data, json_output, title="Collection remove paper")
     except ApiError as e:
         _handle_error(e)
@@ -323,7 +448,7 @@ def collection_remove(
 
 @collection_app.command("papers")
 def collection_papers(
-    collection_id: str = typer.Argument(..., help="Collection ID"),
+    collection_id: str = typer.Argument(..., help="Collection ID or name"),
     limit: Optional[int] = typer.Option(None, "--limit", "-n", help="Limit results"),
     offset: Optional[int] = typer.Option(None, "--offset", help="Pagination offset"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
@@ -331,8 +456,9 @@ def collection_papers(
 ):
     client = ScholarInboxClient(no_retry=no_retry)
     try:
-        data = client.collection_papers(collection_id, limit=limit, offset=offset)
-        _print_output(data, json_output, title=f"Collection {collection_id}")
+        cid = _resolve_collection_id(client, collection_id)
+        data = client.collection_papers(cid, limit=limit, offset=offset)
+        _print_output(data, json_output, title=f"Collection {cid}")
     except ApiError as e:
         _handle_error(e)
     finally:
@@ -341,7 +467,7 @@ def collection_papers(
 
 @collection_app.command("similar")
 def collection_similar(
-    collection_ids: list[str] = typer.Argument(..., help="Collection ID(s)"),
+    collection_ids: list[str] = typer.Argument(..., help="Collection ID(s) or names"),
     limit: Optional[int] = typer.Option(None, "--limit", "-n", help="Limit results"),
     offset: Optional[int] = typer.Option(None, "--offset", help="Pagination offset"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
@@ -349,7 +475,8 @@ def collection_similar(
 ):
     client = ScholarInboxClient(no_retry=no_retry)
     try:
-        data = client.collections_similar(collection_ids, limit=limit, offset=offset)
+        resolved = [_resolve_collection_id(client, cid) for cid in collection_ids]
+        data = client.collections_similar(resolved, limit=limit, offset=offset)
         _print_output(data, json_output, title="Similar Papers")
     except ApiError as e:
         _handle_error(e)
