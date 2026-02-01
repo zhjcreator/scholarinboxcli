@@ -23,8 +23,13 @@ uvx scholarinboxcli auth login --url "<magic-link-url>"
 ## Auth
 
 ```bash
+# Log in with the magic-link URL from the web app
 scholarinboxcli auth login --url "https://www.scholar-inbox.com/login?sha_key=...&date=MM-DD-YYYY"
+
+# Check current session and user info
 scholarinboxcli auth status
+
+# Clear local session config
 scholarinboxcli auth logout
 ```
 
@@ -48,6 +53,25 @@ Top-level commands:
 
 Run `scholarinboxcli --help` or `scholarinboxcli <command> --help` for full options.
 
+## Quickstart
+
+```bash
+# Fetch a daily digest by date (MM-DD-YYYY)
+scholarinboxcli digest --date 01-30-2026 --json
+
+# Trending papers (last 7 days)
+scholarinboxcli trending --category ALL --days 7 --json
+
+# Keyword search
+scholarinboxcli search "transformers" --limit 5 --json
+
+# Semantic search
+scholarinboxcli semantic "graph neural networks" --limit 5 --json
+
+# List your bookmarks
+scholarinboxcli bookmark list --json
+```
+
 ## Collections
 
 ```bash
@@ -59,7 +83,11 @@ scholarinboxcli collection list --expanded
 
 # Create, rename, delete
 scholarinboxcli collection create "My Collection"
+
+# Rename by ID (or name)
 scholarinboxcli collection rename 10759 "New Name"
+
+# Delete by ID (or name)
 scholarinboxcli collection delete 10759
 
 # Add/remove papers
@@ -83,23 +111,36 @@ Collection name matching is exact → prefix → contains. If multiple matches e
 ## Search
 
 ```bash
+# Full-text keyword search
 scholarinboxcli search "transformers" --limit 5
 ```
 
 ## Semantic Search
 
 ```bash
+# Semantic similarity search
 scholarinboxcli semantic "graph neural networks" --limit 5
 ```
 
 ## Other commands
 
 ```bash
+# Daily digest view (MM-DD-YYYY)
 scholarinboxcli digest --date 01-30-2026
+
+# Trending papers by category
 scholarinboxcli trending --category ALL --days 7
+
+# Read/like/dislike interactions feed
 scholarinboxcli interactions --type all
+
+# List bookmarks
 scholarinboxcli bookmark list
+
+# List known conferences
 scholarinboxcli conference list
+
+# Search conferences by keyword
 scholarinboxcli conference explore --query "vision"
 ```
 
@@ -115,10 +156,10 @@ Examples for agents/scripting:
 # Auto-JSON when piped
 scholarinboxcli collection list | jq '.'
 
-# Explicit JSON
+# Explicit JSON output
 scholarinboxcli collection papers "AIAgents" --json
 
-# JSON for automation
+# JSON for automation (stable keys)
 scholarinboxcli search "diffusion" --json
 ```
 

@@ -11,7 +11,17 @@ from scholarinboxcli.api.client import ApiError, ScholarInboxClient
 from scholarinboxcli.formatters.json_fmt import format_json
 from scholarinboxcli.formatters.table import format_table
 
-app = typer.Typer(help="Scholar Inbox CLI")
+app = typer.Typer(
+    help=(
+        "Scholar Inbox CLI.\n\n"
+        "Examples:\n"
+        "  scholarinboxcli auth login --url \"https://www.scholar-inbox.com/login?sha_key=...&date=MM-DD-YYYY\"\n"
+        "  scholarinboxcli digest --date 01-30-2026 --json\n"
+        "  scholarinboxcli search \"transformers\" --limit 5 --json\n"
+        "  scholarinboxcli collection papers \"AIAgents\" --json\n"
+        "  scholarinboxcli conference explore --query \"vision\" --json\n"
+    )
+)
 
 
 auth_app = typer.Typer(help="Authentication commands", no_args_is_help=True)
