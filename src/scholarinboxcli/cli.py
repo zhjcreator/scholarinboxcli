@@ -19,7 +19,7 @@ app = typer.Typer(
         "  scholarinboxcli digest --date 01-30-2026 --json\n"
         "  scholarinboxcli search \"transformers\" --limit 5 --json\n"
         "  scholarinboxcli collection papers \"AIAgents\" --json\n"
-        "  scholarinboxcli conference explore --query \"vision\" --json\n"
+        "  scholarinboxcli conference explore --json\n"
     )
 )
 
@@ -511,14 +511,12 @@ def conference_list(
 
 @conference_app.command("explore")
 def conference_explore(
-    query: Optional[str] = typer.Option(None, "--query", help="Search query"),
-    sort: Optional[str] = typer.Option(None, "--sort", help="Sort option"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
 ):
     client = ScholarInboxClient(no_retry=no_retry)
     try:
-        data = client.conference_explorer(query=query, sort=sort)
+        data = client.conference_explorer()
         _print_output(data, json_output, title="Conference Explorer")
     except ApiError as e:
         _handle_error(e)

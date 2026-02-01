@@ -140,8 +140,8 @@ scholarinboxcli bookmark list
 # List known conferences
 scholarinboxcli conference list
 
-# Search conferences by keyword
-scholarinboxcli conference explore --query "vision"
+# Explore conference indices
+scholarinboxcli conference explore
 ```
 
 ## Output modes
@@ -183,7 +183,7 @@ scholarinboxcli collection list --expanded --json
 scholarinboxcli collection papers "AIAgents" --json
 scholarinboxcli collection similar "AIAgents" --json
 scholarinboxcli conference list --json
-scholarinboxcli conference explore --query "vision" --json
+scholarinboxcli conference explore --json
 ```
 
 ## Notes

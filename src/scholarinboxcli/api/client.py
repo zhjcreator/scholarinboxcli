@@ -351,10 +351,5 @@ class ScholarInboxClient:
     def conference_list(self) -> Any:
         return self._request("GET", "/api/conference_list")
 
-    def conference_explorer(self, query: str | None = None, sort: str | None = None) -> Any:
-        params: dict[str, Any] = {}
-        if query:
-            params["query"] = query
-        if sort:
-            params["sort"] = sort
-        return self._request("GET", "/api/conference-explorer", params=params)
+    def conference_explorer(self) -> Any:
+        return self._request("GET", "/api/conference-explorer")
