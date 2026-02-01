@@ -100,6 +100,9 @@ scholarinboxcli collection papers 10759
 # Similar papers for one or more collections
 scholarinboxcli collection similar 10759 12345
 
+# Optional local sorting for display (e.g., newest first)
+scholarinboxcli collection similar "AIAgents" --sort year
+
 # You can also use collection names (case-insensitive). The CLI will
 # automatically fetch collection ID mappings from the API when needed.
 scholarinboxcli collection papers "AIAgents"

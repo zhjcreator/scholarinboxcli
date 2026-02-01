@@ -9,6 +9,7 @@ import typer
 from scholarinboxcli.commands.common import print_output, with_client
 from scholarinboxcli.formatters.domain_tables import format_collection_list
 from scholarinboxcli.services.collections import resolve_collection_id
+from scholarinboxcli.services.paper_sort import sort_paper_response
 
 
 app = typer.Typer(help="Collection commands", no_args_is_help=True)
@@ -120,12 +121,15 @@ def collection_similar(
     collection_ids: list[str] = typer.Argument(..., help="Collection ID(s) or names"),
     limit: Optional[int] = typer.Option(None, "--limit", "-n", help="Limit results"),
     offset: Optional[int] = typer.Option(None, "--offset", help="Pagination offset"),
+    sort_by: Optional[str] = typer.Option(None, "--sort", help="Sort papers by: year, title"),
+    asc: bool = typer.Option(False, "--asc", help="Sort ascending (default is descending)"),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
     no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
 ):
     def action(client):
         resolved = [resolve_collection_id(client, cid) for cid in collection_ids]
         data = client.collections_similar(resolved, limit=limit, offset=offset)
+        data = sort_paper_response(data, sort_by, asc)
         print_output(data, json_output, title="Similar Papers")
 
     with_client(no_retry, action)
