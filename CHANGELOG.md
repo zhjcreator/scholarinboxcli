@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-02-01
+
+### Added
+
+- Added `LICENSE` (MIT) file.
+- Added CI workflow (`.github/workflows/ci.yml`) for help smoke-check + pytest.
+- Added offline smoke tests for CLI commands with mocked client behavior.
+- Added logic-focused collection resolution unit tests (exact/prefix/contains/ambiguity/fallbacks).
+- Added mocked API client tests for bookmark payload/fallback behavior and conference explorer calls.
+- Added Keep a Changelog style `CHANGELOG.md`.
+
+### Changed
+
+- Refactored CLI into focused command modules (`auth`, `papers`, `bookmarks`, `collections`, `conferences`).
+- Moved collection name/ID resolution into a dedicated service module.
+- Centralized API endpoint constants in `api/endpoints.py`.
+- Reduced command boilerplate via shared `with_client()` helper for client lifecycle and error handling.
+
 ## [0.1.0] - 2026-02-01
 
 ### Added
@@ -36,5 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tracked Python bytecode artifacts (`.pyc`) removed from repository history and ignored via `.gitignore`.
 
-[Unreleased]: https://github.com/mrshu/scholarinboxcli/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/mrshu/scholarinboxcli/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.0
