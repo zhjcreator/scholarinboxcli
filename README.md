@@ -213,3 +213,9 @@ If using an API token:
 export TWINE_USERNAME=__token__
 export TWINE_PASSWORD=<your-pypi-token>
 ```
+
+Automated publish is also configured via GitHub Actions:
+
+- Workflow: `.github/workflows/publish.yml`
+- Trigger: push a tag matching `v*` (for example `v0.1.1`)
+- Auth: PyPI Trusted Publishing (OIDC)
