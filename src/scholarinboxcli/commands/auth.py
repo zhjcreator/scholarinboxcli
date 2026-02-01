@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import typer
 
-from scholarinboxcli.api.client import ApiError
-from scholarinboxcli.commands.common import close_client, handle_error, print_output
+from scholarinboxcli.commands.common import print_output, with_client
 
 
 app = typer.Typer(help="Authentication commands", no_args_is_help=True)
@@ -15,30 +14,20 @@ app = typer.Typer(help="Authentication commands", no_args_is_help=True)
 def auth_login(
     url: str = typer.Option(..., "--url", help="Magic login URL with sha_key"),
 ):
-    from scholarinboxcli.commands.common import ScholarInboxClient
-
-    client = ScholarInboxClient()
-    try:
+    def action(client):
         client.login_with_magic_link(url)
         typer.echo("Login successful")
-    except ApiError as e:
-        handle_error(e)
-    finally:
-        close_client(client)
+
+    with_client(False, action)
 
 
 @app.command("status")
 def auth_status(json_output: bool = typer.Option(False, "--json", help="Output as JSON")):
-    from scholarinboxcli.commands.common import ScholarInboxClient
-
-    client = ScholarInboxClient()
-    try:
+    def action(client):
         data = client.session_info()
         print_output(data, json_output, title="Session")
-    except ApiError as e:
-        handle_error(e)
-    finally:
-        close_client(client)
+
+    with_client(False, action)
 
 
 @app.command("logout")

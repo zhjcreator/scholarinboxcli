@@ -6,8 +6,7 @@ from typing import Optional
 
 import typer
 
-from scholarinboxcli.api.client import ApiError
-from scholarinboxcli.commands.common import close_client, handle_error, print_output
+from scholarinboxcli.commands.common import print_output, with_client
 
 
 def register(app: typer.Typer) -> None:
@@ -17,16 +16,11 @@ def register(app: typer.Typer) -> None:
         json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
         no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
     ):
-        from scholarinboxcli.commands.common import ScholarInboxClient
-
-        client = ScholarInboxClient(no_retry=no_retry)
-        try:
+        def action(client):
             data = client.get_digest(date)
             print_output(data, json_output, title="Digest")
-        except ApiError as e:
-            handle_error(e)
-        finally:
-            close_client(client)
+
+        with_client(no_retry, action)
 
     @app.command("trending")
     def trending(
@@ -37,16 +31,11 @@ def register(app: typer.Typer) -> None:
         json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
         no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
     ):
-        from scholarinboxcli.commands.common import ScholarInboxClient
-
-        client = ScholarInboxClient(no_retry=no_retry)
-        try:
+        def action(client):
             data = client.get_trending(category=category, days=days, sort=sort, asc=asc)
             print_output(data, json_output, title="Trending")
-        except ApiError as e:
-            handle_error(e)
-        finally:
-            close_client(client)
+
+        with_client(no_retry, action)
 
     @app.command("search")
     def search(
@@ -57,16 +46,11 @@ def register(app: typer.Typer) -> None:
         json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
         no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
     ):
-        from scholarinboxcli.commands.common import ScholarInboxClient
-
-        client = ScholarInboxClient(no_retry=no_retry)
-        try:
+        def action(client):
             data = client.search(query=query, sort=sort, limit=limit, offset=offset)
             print_output(data, json_output, title="Search")
-        except ApiError as e:
-            handle_error(e)
-        finally:
-            close_client(client)
+
+        with_client(no_retry, action)
 
     @app.command("semantic")
     def semantic_search(
@@ -77,22 +61,17 @@ def register(app: typer.Typer) -> None:
         json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
         no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
     ):
-        from scholarinboxcli.commands.common import ScholarInboxClient
-
         if not text and not file:
             typer.echo("Provide text or --file", err=True)
             raise typer.Exit(1)
         if file:
             text = open(file, "r", encoding="utf-8").read()
 
-        client = ScholarInboxClient(no_retry=no_retry)
-        try:
+        def action(client):
             data = client.semantic_search(text=text or "", limit=limit, offset=offset)
             print_output(data, json_output, title="Semantic Search")
-        except ApiError as e:
-            handle_error(e)
-        finally:
-            close_client(client)
+
+        with_client(no_retry, action)
 
     @app.command("interactions")
     def interactions(
@@ -102,13 +81,8 @@ def register(app: typer.Typer) -> None:
         json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
         no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
     ):
-        from scholarinboxcli.commands.common import ScholarInboxClient
-
-        client = ScholarInboxClient(no_retry=no_retry)
-        try:
+        def action(client):
             data = client.interactions(type_=type_, sort=sort, asc=asc)
             print_output(data, json_output, title="Interactions")
-        except ApiError as e:
-            handle_error(e)
-        finally:
-            close_client(client)
+
+        with_client(no_retry, action)
