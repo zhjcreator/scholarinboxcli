@@ -1,6 +1,6 @@
 # scholarinboxcli
 
-CLI for Scholar Inbox (authenticated web API).
+CLI for Scholar Inbox, for humans and agents alike.
 
 ## Installation
 
