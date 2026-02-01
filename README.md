@@ -103,6 +103,9 @@ scholarinboxcli collection similar 10759 12345
 # Optional local sorting for display (e.g., newest first)
 scholarinboxcli collection similar "AIAgents" --sort year
 
+# Sort ascending instead
+scholarinboxcli collection similar "AIAgents" --sort year --asc
+
 # You can also use collection names (case-insensitive). The CLI will
 # automatically fetch collection ID mappings from the API when needed.
 scholarinboxcli collection papers "AIAgents"
@@ -110,6 +113,7 @@ scholarinboxcli collection similar "AIAgents" "Benchmark"
 ```
 
 Collection name matching is exact → prefix → contains. If multiple matches exist, the CLI reports ambiguity and shows candidate IDs.
+`collection similar` supports client-side sorting with `--sort year|title` and optional `--asc`.
 
 ## Search
 
