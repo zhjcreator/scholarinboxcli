@@ -190,3 +190,26 @@ scholarinboxcli conference explore --json
 
 - Some collection mutations (create/rename/delete/add/remove) rely on best-effort endpoints that may change on the service side. If a mutation fails, try again or use the web UI to validate the current behavior.
 - Similar papers for collections uses the server endpoint used by the web UI. Results typically appear under `digest_df` in JSON responses.
+
+## Publish to PyPI
+
+```bash
+# 1) Build sdist + wheel
+uv run --with build python -m build
+
+# 2) Validate metadata/rendering
+uvx twine check dist/*
+
+# 3) (Optional) test publish first
+uvx twine upload --repository testpypi dist/*
+
+# 4) Publish to PyPI
+uvx twine upload dist/*
+```
+
+If using an API token:
+
+```bash
+export TWINE_USERNAME=__token__
+export TWINE_PASSWORD=<your-pypi-token>
+```
