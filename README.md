@@ -1,6 +1,6 @@
 # scholarinboxcli
 
-CLI for Scholar Inbox, for humans and agents alike.
+CLI for [Scholar Inbox](https://scholar-inbox.com), for humans and agents alike.
 
 ## Installation
 
