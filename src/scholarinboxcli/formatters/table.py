@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+import json
 
 from rich.console import Console
 from rich.table import Table
@@ -34,33 +35,67 @@ def _extract_papers(data: Any) -> list[dict[str, Any]]:
     return []
 
 
-def format_table(data: Any, title: str | None = None) -> str:
-    papers = _extract_papers(data)
-    if not papers:
-        return "(no results)"
+def _format_scalar(value: Any) -> str:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=True)
+    return str(value)
 
+
+def _format_kv_table(data: dict[str, Any], title: str | None = None) -> str:
     table = Table(title=title)
-    table.add_column("Title", overflow="fold")
-    table.add_column("Authors", overflow="fold")
-    table.add_column("Year", justify="right")
-    table.add_column("Venue", overflow="fold")
-    table.add_column("ID", overflow="fold")
-
-    for p in papers:
-        title_val = str(p.get("title") or p.get("paper_title") or "")
-        authors_val = _get_authors(p)
-        year_val = str(p.get("year") or p.get("publication_year") or "")
-        venue_val = str(p.get("venue") or p.get("conference") or p.get("journal") or "")
-        pid = str(
-            p.get("paper_id")
-            or p.get("paperId")
-            or p.get("id")
-            or p.get("corpusid")
-            or ""
-        )
-        table.add_row(title_val, authors_val, year_val, venue_val, pid)
-
+    table.add_column("Field", overflow="fold")
+    table.add_column("Value", overflow="fold")
+    for key, value in data.items():
+        table.add_row(str(key), _format_scalar(value))
     console = Console()
     with console.capture() as capture:
         console.print(table)
     return capture.get()
+
+
+def _format_list_table(data: list[Any], title: str | None = None) -> str:
+    table = Table(title=title)
+    table.add_column("#", justify="right")
+    table.add_column("Value", overflow="fold")
+    for idx, value in enumerate(data, start=1):
+        table.add_row(str(idx), _format_scalar(value))
+    console = Console()
+    with console.capture() as capture:
+        console.print(table)
+    return capture.get()
+
+
+def format_table(data: Any, title: str | None = None) -> str:
+    papers = _extract_papers(data)
+    if papers:
+        table = Table(title=title)
+        table.add_column("Title", overflow="fold")
+        table.add_column("Authors", overflow="fold")
+        table.add_column("Year", justify="right")
+        table.add_column("Venue", overflow="fold")
+        table.add_column("ID", overflow="fold")
+
+        for p in papers:
+            title_val = str(p.get("title") or p.get("paper_title") or "")
+            authors_val = _get_authors(p)
+            year_val = str(p.get("year") or p.get("publication_year") or "")
+            venue_val = str(p.get("venue") or p.get("conference") or p.get("journal") or "")
+            pid = str(
+                p.get("paper_id")
+                or p.get("paperId")
+                or p.get("id")
+                or p.get("corpusid")
+                or ""
+            )
+            table.add_row(title_val, authors_val, year_val, venue_val, pid)
+
+        console = Console()
+        with console.capture() as capture:
+            console.print(table)
+        return capture.get()
+
+    if isinstance(data, dict) and data:
+        return _format_kv_table(data, title=title)
+    if isinstance(data, list) and data:
+        return _format_list_table(data, title=title)
+    return "(no results)"
