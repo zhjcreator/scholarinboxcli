@@ -201,18 +201,18 @@ class ScholarInboxClient:
         return self._request("GET", "/api/bookmarks")
 
     def bookmark_add(self, paper_id: str) -> Any:
-        payload = {"paper_id": paper_id}
+        payload = {"bookmarked": True, "id": paper_id}
         try:
             return self._request("POST", "/api/bookmark_paper/", json=payload)
         except ApiError:
             return self._request("POST", "/api/bookmark_paper/", data=payload)
 
     def bookmark_remove(self, paper_id: str) -> Any:
-        payload = {"paper_id": paper_id}
+        payload = {"bookmarked": False, "id": paper_id}
         try:
-            return self._request("POST", "/api/unbookmark_paper/", json=payload)
+            return self._request("POST", "/api/bookmark_paper/", json=payload)
         except ApiError:
-            return self._request("POST", "/api/unbookmark_paper/", data=payload)
+            return self._request("POST", "/api/bookmark_paper/", data=payload)
 
     def collections_list(self) -> Any:
         try:
