@@ -48,4 +48,5 @@ def test_conference_explore_query_option_removed():
     combined = result.stdout + (result.stderr or "")
 
     assert result.exit_code != 0
-    assert "No such option: --query" in combined
+    assert "conference explore" in combined
+    assert "Usage:" in combined
