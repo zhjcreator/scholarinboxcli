@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-02-04
+
+### Added
+
+- Added collection-aware paper formatting for bookmark and collection views.
+- Added tests for bookmark collection lookup and collection paper formatting.
+- Added dev tooling dependencies for pytest and ruff.
+
+### Changed
+
+- Bookmarks now resolve the "Bookmarks" collection and load papers via `/api/get_collections`.
+- Collection paper retrieval prefers `/api/get_collections` with fallback to legacy endpoints.
+- Cleaned up minor lint issues and restored `_resolve_collection_id` export for tests.
+
 ## [0.1.1] - 2026-02-01
 
 ### Added
@@ -54,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tracked Python bytecode artifacts (`.pyc`) removed from repository history and ignored via `.gitignore`.
 
-[Unreleased]: https://github.com/mrshu/scholarinboxcli/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/mrshu/scholarinboxcli/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.0
