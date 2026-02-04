@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-02-04
+
+### Changed
+
+- Updated project tagline to emphasize humans + agents use case.
+
 ## [0.1.2] - 2026-02-04
 
 ### Added
@@ -68,7 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tracked Python bytecode artifacts (`.pyc`) removed from repository history and ignored via `.gitignore`.
 
-[Unreleased]: https://github.com/mrshu/scholarinboxcli/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/mrshu/scholarinboxcli/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mrshu/scholarinboxcli/releases/tag/v0.1.0

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scholarinboxcli"
-version = "0.1.2"
-description = "CLI for Scholar Inbox (authenticated web API)"
+version = "0.1.3"
+description = "Scholar Inbox CLI for digests, search, collections, and bookmarks, for humans and agents alike"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
