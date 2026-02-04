@@ -7,7 +7,7 @@ from typing import Optional
 import typer
 
 from scholarinboxcli.commands.common import print_output, with_client
-from scholarinboxcli.formatters.domain_tables import format_collection_list
+from scholarinboxcli.formatters.domain_tables import format_collection_list, format_collection_papers
 from scholarinboxcli.services.collections import resolve_collection_id
 from scholarinboxcli.services.paper_sort import sort_paper_response
 
@@ -111,7 +111,7 @@ def collection_papers(
     def action(client):
         cid = resolve_collection_id(client, collection_id)
         data = client.collection_papers(cid, limit=limit, offset=offset)
-        print_output(data, json_output, title=f"Collection {cid}")
+        print_output(data, json_output, title=f"Collection {cid}", table_formatter=format_collection_papers)
 
     with_client(no_retry, action)
 

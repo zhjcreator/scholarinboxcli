@@ -5,6 +5,7 @@ from __future__ import annotations
 import typer
 
 from scholarinboxcli.commands.common import print_output, with_client
+from scholarinboxcli.formatters.domain_tables import format_collection_papers
 
 
 app = typer.Typer(help="Bookmark commands", no_args_is_help=True)
@@ -17,7 +18,7 @@ def bookmark_list(
 ):
     def action(client):
         data = client.bookmarks()
-        print_output(data, json_output, title="Bookmarks")
+        print_output(data, json_output, title="Bookmarks", table_formatter=format_collection_papers)
 
     with_client(no_retry, action)
 

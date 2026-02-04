@@ -91,3 +91,32 @@ def format_conference_explore(data: Any, title: str | None = None) -> str:
             table.add_row(str(abbrev), str(name), rel_str, years_str)
         return _render(table)
     return format_table(data, title)
+
+
+def _extract_collection_papers(data: Any) -> list[dict[str, Any]]:
+    if isinstance(data, list):
+        return [item for item in data if isinstance(item, dict)]
+    if isinstance(data, dict):
+        for key in ("papers", "digest_df", "items", "results", "data"):
+            val = data.get(key)
+            if isinstance(val, list):
+                return [item for item in val if isinstance(item, dict)]
+        collections = data.get("collections")
+        if isinstance(collections, list):
+            papers: list[dict[str, Any]] = []
+            for collection in collections:
+                if isinstance(collection, dict):
+                    for key in ("papers", "digest_df"):
+                        val = collection.get(key)
+                        if isinstance(val, list):
+                            papers.extend([item for item in val if isinstance(item, dict)])
+            if papers:
+                return papers
+    return []
+
+
+def format_collection_papers(data: Any, title: str | None = None) -> str:
+    papers = _extract_collection_papers(data)
+    if papers:
+        return format_table(papers, title)
+    return format_table(data, title)

@@ -14,13 +14,13 @@ SEMANTIC_SEARCH = "/api/semantic-search"
 INTERACTIONS = "/api/interactions"
 
 # Bookmarks
-BOOKMARKS = "/api/bookmarks"
 BOOKMARK_PAPER = "/api/bookmark_paper/"
 
 # Collections
 COLLECTIONS_PRIMARY = "/api/get_all_user_collections"
 COLLECTIONS_FALLBACK = "/api/collections"
 COLLECTIONS_EXPANDED = "/api/get_expanded_collections"
+COLLECTIONS_GET = "/api/get_collections"
 COLLECTION_CREATE_CANDIDATES = (
     "/api/create_collection/",
     "/api/collections",

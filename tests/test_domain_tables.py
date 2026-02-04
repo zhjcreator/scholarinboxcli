@@ -3,6 +3,7 @@ from __future__ import annotations
 from scholarinboxcli.formatters.domain_tables import (
     format_auth_status,
     format_collection_list,
+    format_collection_papers,
     format_conference_explore,
     format_conference_list,
 )
@@ -51,3 +52,9 @@ def test_format_conference_explore_table():
     out = format_conference_explore(data, "Conference Explorer")
     assert "ACL" in out
     assert "0.900" in out
+
+
+def test_format_collection_papers_from_collections():
+    data = {"collections": [{"papers": [{"title": "Test Paper", "authors": "A. Author"}]}]}
+    out = format_collection_papers(data, "Bookmarks")
+    assert "Test Paper" in out

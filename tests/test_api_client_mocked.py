@@ -58,3 +58,26 @@ def test_conference_explorer_uses_unfiltered_endpoint(monkeypatch):
 
     assert out == {"conf_data_list": []}
     assert calls == [("GET", "/api/conference-explorer", {})]
+
+
+def test_bookmarks_fetches_bookmarks_collection(monkeypatch):
+    client = ScholarInboxClient()
+    calls = []
+
+    def fake_request(method, url, **kwargs):
+        calls.append((method, url, kwargs))
+        if url == "/api/get_all_user_collections":
+            return {"collections": [{"id": 5, "name": "Bookmarks"}]}
+        if url == "/api/get_collections":
+            return {"collections": [{"papers": []}]}
+        return {}
+
+    monkeypatch.setattr(client, "_request", fake_request)
+    try:
+        out = client.bookmarks()
+    finally:
+        client.close()
+
+    assert out == {"collections": [{"papers": []}]}
+    assert calls[0] == ("GET", "/api/get_all_user_collections", {})
+    assert calls[1] == ("POST", "/api/get_collections", {"json": {"collection_ids": ["5"]}})

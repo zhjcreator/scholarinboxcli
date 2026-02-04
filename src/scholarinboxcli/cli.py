@@ -5,7 +5,7 @@ from __future__ import annotations
 import typer
 
 from scholarinboxcli.commands import auth, bookmarks, collections, conferences, papers
-from scholarinboxcli.services.collections import resolve_collection_id as _resolve_collection_id
+from scholarinboxcli.services.collections import resolve_collection_id as _resolve_collection_id  # noqa: F401
 
 
 app = typer.Typer(
