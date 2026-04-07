@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 import typer
 
 from scholarinboxcli.commands.common import print_output, with_client
@@ -13,10 +15,18 @@ app = typer.Typer(help="Authentication commands", no_args_is_help=True)
 
 @app.command("login")
 def auth_login(
-    url: str = typer.Option(..., "--url", help="Magic login URL with sha_key"),
+    url: Optional[str] = typer.Option(None, "--url", help="Magic login URL with sha_key"),
+    sha_key: Optional[str] = typer.Option(None, "--sha-key", help="SHA key directly (without full URL)"),
 ):
+    if not url and not sha_key:
+        typer.echo("Provide --url or --sha-key", err=True)
+        raise typer.Exit(1)
+
     def action(client):
-        client.login_with_magic_link(url)
+        if sha_key:
+            client.login_with_sha_key(sha_key)
+        else:
+            client.login_with_magic_link(url)
         typer.echo("Login successful")
 
     with_client(False, action)

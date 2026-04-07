@@ -125,6 +125,13 @@ class ScholarInboxClient:
         self.cfg.api_base = self.api_base
         save_config(self.cfg)
 
+    def login_with_sha_key(self, sha_key: str) -> None:
+        """Login directly using a sha_key (without a full magic link URL)."""
+        resp = self.client.get(ep.LOGIN_WITH_SHA_TEMPLATE.format(sha_key=sha_key))
+        if resp.status_code >= 400:
+            raise ApiError("Login failed", resp.status_code, resp.text)
+        self.save_cookies()
+
     def login_with_magic_link(self, login_url: str) -> None:
         sha_key = None
         try:
@@ -382,3 +389,8 @@ class ScholarInboxClient:
 
     def conference_explorer(self) -> Any:
         return self._request("GET", ep.CONFERENCE_EXPLORER)
+
+    def rate_paper(self, paper_id: str, rating: int) -> Any:
+        """Rate a paper. rating: 1=upvote, -1=downvote, 0=neutral/remove."""
+        payload = {"paper_id": paper_id, "id": paper_id, "rating": rating}
+        return self._request("POST", ep.RATE_PAPER, json=payload)

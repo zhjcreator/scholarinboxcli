@@ -52,3 +52,6 @@ COLLECTIONS_SIMILAR = "/api/get_collections_similar_papers/"
 # Conferences
 CONFERENCE_LIST = "/api/conference_list"
 CONFERENCE_EXPLORER = "/api/conference-explorer"
+
+# Paper rating
+RATE_PAPER = "/api/make_rating/"

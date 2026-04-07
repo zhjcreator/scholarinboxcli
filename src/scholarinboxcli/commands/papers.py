@@ -86,3 +86,21 @@ def register(app: typer.Typer) -> None:
             print_output(data, json_output, title="Interactions")
 
         with_client(no_retry, action)
+
+    @app.command("rate")
+    def rate(
+        paper_id: str = typer.Argument(..., help="Paper ID to rate"),
+        rating: int = typer.Argument(..., help="Rating value: 1=upvote, -1=downvote, 0=remove"),
+        no_retry: bool = typer.Option(False, "--no-retry", help="Disable retry on rate limits"),
+    ):
+        """Rate a paper (upvote/downvote/remove rating)."""
+        if rating not in (1, -1, 0):
+            typer.echo("Rating must be 1 (upvote), -1 (downvote), or 0 (remove)", err=True)
+            raise typer.Exit(1)
+
+        def action(client):
+            client.rate_paper(paper_id, rating)
+            label = {1: "upvoted", -1: "downvoted", 0: "rating removed"}[rating]
+            typer.echo(f"Paper {paper_id}: {label}")
+
+        with_client(no_retry, action)
