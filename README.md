@@ -46,6 +46,7 @@ Top-level commands:
 - `trending`
 - `search`
 - `semantic`
+- `rate` *(fork only — rate papers)*
 - `interactions`
 - `bookmark` (list/add/remove)
 - `collection` (list/create/rename/delete/add/remove/papers/similar)
@@ -128,6 +129,23 @@ scholarinboxcli search "transformers" --limit 5
 # Semantic similarity search
 scholarinboxcli semantic "graph neural networks" --limit 5
 ```
+
+## Other commands
+
+## Rate Papers *(fork only)*
+
+```bash
+# Upvote a paper
+scholarinboxcli rate PAPER_ID 1
+
+# Downvote a paper
+scholarinboxcli rate PAPER_ID -1
+
+# Remove your rating
+scholarinboxcli rate PAPER_ID 0
+```
+
+Get paper IDs from the `_id` field in search/digest/trending/similar results.
 
 ## Other commands
 
