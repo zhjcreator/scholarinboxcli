@@ -26,14 +26,19 @@ uvx scholarinboxcli auth login --url "<magic-link-url>"
 # Log in with the magic-link URL from the web app
 scholarinboxcli auth login --url "https://www.scholar-inbox.com/login?sha_key=...&date=MM-DD-YYYY"
 
+# Log in with sha_key directly (fork only)
+scholarinboxcli auth login --sha-key "YOUR_SHA_KEY"
+
+# Or set the env var — login without any flag needed (fork only)
+export SCHOLAR_INBOX_SHA_KEY="YOUR_SHA_KEY"
+scholarinboxcli auth login
+
 # Check current session and user info
 scholarinboxcli auth status
 
 # Clear local session config
 scholarinboxcli auth logout
 ```
-
-Note: `auth login` extracts `sha_key` from the URL and authenticates via the API.
 
 Config is stored at `~/.config/scholarinboxcli/config.json`. You can override the API base with `SCHOLAR_INBOX_API_BASE`.
 
